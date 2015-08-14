@@ -82,7 +82,7 @@ function getBuildingsByBB(m){
         for (var i = geojson.features.length - 1; i >= 0; i--) {
             if ($.inArray(geojson.features[i].properties.bbl,all_the_things) == -1){
                 all_the_things.push(geojson.features[i].properties.bbl)
-                add_json = L.geoJson(geojson,{
+                add_json = L.geoJson(geojson.features[i],{
                 onEachFeature: function(feature, layer){
                     layer.on({click: function(e){
                         window.location.hash = feature.properties.bbl
@@ -90,6 +90,7 @@ function getBuildingsByBB(m){
                 }
                 })
                 add_json.addTo(ff)
+
             }
         };
         })
