@@ -42,8 +42,10 @@ if (hashurl[1]){
         
         geom_center = get_center.getBounds().getCenter()
          map = new L.Map("map",{
+            zoomControl: false,
             center: geom_center,
             zoom: 19
+
         })
         baselayer.addTo(map)
         buildings = L.geoJson(geojson, {
@@ -62,12 +64,15 @@ if (hashurl[1]){
     })
 } else {
     var map = new L.Map("map", {
+    zoomControl: false,
     center: new L.LatLng(40.7009,-73.9579),
     zoom: 11
     });
     cc.addTo(map)
     zoomChangeLayers(map)
 }
+
+new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
 
 //don't load everything at once if you don't have to
 function getBuildingsByBB(m){
@@ -105,3 +110,22 @@ function zoomChangeLayers(m) {
         }
     })
 }
+
+
+//navigation 
+var pull = $('#pull');
+var nav = $('#ui-info');
+
+navHeight  = nav.height();
+
+$(pull).on('click', function(e) {  
+        e.preventDefault();  
+        nav.slideToggle();  
+    }); 
+
+$(window).resize(function(){  
+    var w = $(window).width();  
+    if(w > 320 && nav.is(':hidden')) {  
+        nav.removeAttr('style');
+    }  
+});  

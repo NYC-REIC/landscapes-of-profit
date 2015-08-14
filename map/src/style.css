@@ -1,3 +1,112 @@
 body { margin:0; padding:0; }
 
-#map { position:absolute; top:0; bottom:0; width:100%; z-index: 0;}
+#nav {
+
+}
+
+#map{
+	top: 0;
+	bottom: 0;
+	width: 100%;
+	position: absolute;
+	z-index: 0;
+
+}
+#bldg_info { display: none; background-color: white; }
+
+h1, h2, h3, h4, h5, p {
+	font-family: "neuzeit-grotesk", sans-serif;
+}
+
+
+/*nav*/
+#map-ui {
+	padding: 5px;
+	position: relative;
+	z-index: 999999;
+}
+#map-ui li{
+	list-style: none;
+	display: inline;
+	float: left;
+	width: auto;
+    font-family: "neuzeit-grotesk", sans-serif;
+    background: #FFF;
+    color: black;
+    padding: 0;
+    margin-right: 5px;
+    border: 2px solid #c14a95;
+    padding: 5px;
+}
+
+#map-ui li#label{
+	font-family: "neuzeit-grotesk", sans-serif;
+    color: #c14a95;
+    background: white;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #c14a95;
+    padding: 5px;
+    text-decoration: none;
+}
+
+#map-ui li a{
+	color: #c14a95;
+}
+
+#map-ui li.active {
+    background: #c14a95;
+    color: white;
+}
+
+#map-nav li#pull {  
+    display: none; 
+}  
+
+/*sloppy media queries*/
+@media screen and (max-width: 480px){
+
+#map-ui { border-bottom: 0; 
+		height: auto;  
+        padding: 0px; }  
+
+#ui-info {  
+    display: none;  
+
+    }
+#info{
+	top:75%;
+	max-height: 45px;
+	overflow: scroll;
+}
+#map-ui li{
+	display: block;
+	float: none;
+}  
+
+#map-nav{
+	padding: 0px;
+	position: relative;
+	margin-bottom:5px; 
+	z-index: 999999;
+}
+
+#map-nav li#pull {  
+	display: block;
+	font-family: "neuzeit-grotesk", sans-serif;   
+	width: auto;  
+	position: relative; 
+	background: #c14a95;
+	color: white;
+	margin: 0;
+	padding: 0;
+	border: 1px solid #c14a95;
+	padding: 5px;
+
+    }  
+#map-nav li#pull a{
+	font-family: "neuzeit-grotesk", sans-serif;
+	color: #fff;
+	text-decoration: none;  
+}
+}
