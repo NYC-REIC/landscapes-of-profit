@@ -3,17 +3,13 @@ var sql = new cartodb.SQL({ user: 'lifewinning', format: 'geojson' });
 
 all_the_things = []
 
-function zoomToFeature(e) {
-  map.fitBounds(e.target.getBounds());
-}
-
 url = window.location.href
 hashurl = url.split('#')
 
 cc = new L.FeatureGroup()
 ff = new L.FeatureGroup()
 
-var map, buildings, geom_center
+var map, buildings, geom_center, prev_bldg
 
 c = sql.execute("SELECT * FROM nycc_joined_to_nyc_flips_2263").done(function(geojson) {
     cc_map = L.geoJson(geojson)
@@ -49,18 +45,27 @@ if (hashurl[1]){
         })
         baselayer.addTo(map)
         buildings = L.geoJson(geojson, {
+            style : {
+                'fillColor': '#FA98D6',
+                'fillOpacity': 1,
+                'stroke': 0
+            },
             onEachFeature: function(feature, layer){
                 layer.on({click: function(e){
                     window.location.hash = feature.properties.bbl
                  }})
+                prev_bldg = layer
                 all_the_things.push(feature.properties.bbl)
             }
         })
         buildings.addTo(ff)
         ff.addTo(map)
         zoomChangeLayers(map)
-
         getBuildingsByBB(map)
+        map.on('moveend', function(){
+            getBuildingsByBB(map)   
+        })
+
     })
 } else {
     var map = new L.Map("map", {
@@ -70,31 +75,58 @@ if (hashurl[1]){
     });
     cc.addTo(map)
     zoomChangeLayers(map)
+    map.on('moveend', function(){
+     getBuildingsByBB(map)   
+    })
+    
 }
 
 new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
 
 //don't load everything at once if you don't have to
 function getBuildingsByBB(m){
-    m.on('moveend', function(){
-        bounds = map.getBounds()
+    // m.on('moveend', function(){
+        bounds = m.getBounds()
         b = sql.execute("SELECT * FROM nyc_flips WHERE the_geom && ST_SetSRID(ST_MakeBox2D(ST_Point("+bounds._northEast.lng+","+bounds._northEast.lat+"), ST_Point("+bounds._southWest.lng+","+bounds._southWest.lat+")), 4326)").done(function(geojson){       
         for (var i = geojson.features.length - 1; i >= 0; i--) {
             if ($.inArray(geojson.features[i].properties.bbl,all_the_things) == -1){
+                //assigning a height and color property to buildings just to see if i can dynamically do that and then use OSMBuildings? 
+                // geojson.features[i].properties['height'] = (geojson.features[i].properties.after_d_01)/1000
+                // geojson.features[i].properties['color'] = "rgb(255,200,150)"
                 all_the_things.push(geojson.features[i].properties.bbl)
+                
                 add_json = L.geoJson(geojson.features[i],{
-                onEachFeature: function(feature, layer){
-                    layer.on({click: function(e){
-                        window.location.hash = feature.properties.bbl
-                     }})
-                }
-                })
-                add_json.addTo(ff)
+                    style : {
+                        'fillColor': '#c14a95',
+                        'fillOpacity': 1,
+                        'stroke': 0
+                    },
+                    onEachFeature: function(feature, layer){
+                        layer.on({click: function(e){
+                            map.fitBounds(layer.getBounds());
+                            window.location.hash = feature.properties.bbl
+                            if (prev_bldg){
+                                prev_bldg.setStyle({
+                                    'fillColor': '#c14a95',
+                                    'fillOpacity': 1,
+                                    'stroke': 0
+                                })
+                            }
+                            layer.setStyle({
+                                    'fillColor': '#FA98D6',
+                                    'fillOpacity': 1,
+                                    'stroke': 0
+                            })
 
+                            prev_bldg = layer
+                         }})
+                    }
+                    })
+                add_json.addTo(ff)
             }
         };
         })
-    })
+   // })
 }
 
 function zoomChangeLayers(m) {
@@ -111,7 +143,6 @@ function zoomChangeLayers(m) {
         }
     })
 }
-
 
 //navigation 
 var pull = $('#pull');
