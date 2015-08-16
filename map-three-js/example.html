@@ -44,8 +44,13 @@
 
 				// lights
 
-				var light = new THREE.AmbientLight( 0xFFFFFF ); // soft white light
+				scene.add( new THREE.AmbientLight( 0x404040 ) );
+
+				var light = new THREE.DirectionalLight( 0xffffff );
+				light.position.set( 1, 1, 0 );
 				scene.add( light );
+
+				//
 
 				var geometry = new THREE.BoxGeometry( 200, 200, 200 );
 				var material = new THREE.MeshLambertMaterial( {color: 0xffff00} );
