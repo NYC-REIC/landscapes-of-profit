@@ -17,7 +17,7 @@ sources:
         url:  nyc_flips.geojson
     osm:
         type: TopoJSON
-        url:  //vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-HqUVidw
+        url:  //vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-ORM3Whk
 
 styles:
    elevator:
