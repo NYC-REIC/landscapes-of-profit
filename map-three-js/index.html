@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>landscapesofprofit - threejs</title>
+		<meta charset="utf-8">
+		<style>
+			body {
+				margin: 0px;
+				background-color: #FFF;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+
+		<script src="scripts/three.min.js"></script>
+
+		<script>
+
+			var camera, scene, renderer;
+			var mesh;
+
+			init();
+			animate();
+
+			function init() {
+
+				renderer = new THREE.WebGLRenderer({alpha:true});
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor( 0xffffff, 1);
+				document.body.appendChild( renderer.domElement );
+
+				//
+
+				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
+				camera.position.y = 30;
+				camera.position.z = 500;
+
+				//
+
+				scene = new THREE.Scene();
+
+				// lights
+
+				var light = new THREE.AmbientLight( 0xFFFFFF ); // soft white light
+				scene.add( light );
+
+				var geometry = new THREE.BoxGeometry( 200, 200, 200 );
+				var material = new THREE.MeshLambertMaterial( {color: 0xffff00} );
+				mesh = new THREE.Mesh( geometry, material );
+				mesh.rotation.x = .1;
+				mesh.rotation.y = 1;
+				scene.add( mesh );
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			}
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+
+				renderer.render( scene, camera );
+
+			}
+
+		</script>
+
+	</body>
+</html>
