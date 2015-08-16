@@ -1,0 +1,24 @@
+{
+  "name": "map-three-js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/NYC-REIC/landscapes-of-profit",
+  "authors": [
+    "Chris Henrick <chrishenrick@gmail.com>"
+  ],
+  "description": "kkk",
+  "main": "main.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "assets/js/vendor/",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.5.6",
+    "jquery": "~2.1.4",
+    "threejs": "*"
+  }
+}
