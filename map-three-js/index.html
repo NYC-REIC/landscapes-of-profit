@@ -35,7 +35,7 @@
 				//
 
 				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
-				camera.position.y = 30;
+				camera.position.y = 20;
 				camera.position.z = 500;
 
 				//
@@ -73,6 +73,8 @@
 
 				requestAnimationFrame( animate );
 
+				mesh.rotation.x += 0.005;
+				mesh.rotation.y += 0.01;
 
 				renderer.render( scene, camera );
 
