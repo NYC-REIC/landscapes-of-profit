@@ -161,3 +161,17 @@ $(window).resize(function(){
         nav.removeAttr('style');
     }  
 });  
+
+$(document).ready(function () {
+  // Searching within a bounding box
+  var southWest = L.latLng(40.49, -74.27),
+      northEast = L.latLng(40.87, -73.68),
+      bounds = L.latLngBounds(southWest, northEast);
+
+  L.control.geocoder({
+    bbox: bounds,
+    position: 'topright',
+    layers: 'address',
+    placeholder: 'Search within New York City'
+  }).addTo(map);
+});
