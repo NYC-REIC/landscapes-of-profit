@@ -9,7 +9,6 @@
 <script src="src/jq.min.js"></script>
 <!-- leaflet -->
 <script src="src/leaflet-src.js"></script>
-<script src="src/leaflet.css"></script>
 <!-- osm buildings -->
 <script src="src/osmb.js"></script>
 <!-- cartodb -->
@@ -17,12 +16,17 @@
 <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.js"></script>
 <!-- stamen -->
 <script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.3.0"></script>
-<!-- pelias -->
-<script src="//rawgit.com/pelias/leaflet-geocoder/master/pelias-leaflet-geocoder.js"></script>
+
+<!-- geocode control -->
+<script src="src/Control.Geocoder.js"></script>
+
+<!-- google places library -->
+<script src="https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places" ></script>
+
 <!-- style -->
 <link rel="stylesheet" type="text/css" href="src/style.css">
-<!-- pelias style -->
-<link rel="stylesheet" href="//rawgit.com/pelias/leaflet-geocoder/master/pelias-leaflet-geocoder.css" />
+<link rel="stylesheet" type="text/css" href="src/leaflet.css" />
+<link rel="stylesheet" type="text/css" href="src/Control.Geocoder.css" />
 </head>
 <body>
 <div id="map-nav"><li id="pull"><a href="#">Landscapes of Profit</a></li></div>
@@ -42,7 +46,6 @@
 
 <!-- the things -->
 <script src="src/script.js"></script>
-
 
 </body>
 </html>
