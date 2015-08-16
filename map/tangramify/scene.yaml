@@ -19,6 +19,18 @@ sources:
         type: TopoJSON
         url:  //vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-HqUVidw
 
+styles:
+   elevator:
+        base: polygons
+        animated: true
+        shaders:
+            blocks:
+                position: |
+                    // Elevator buildings
+                    if (position.z > 0.01) {
+                        position.z *= (sin(position.z + u_time * 1.0) + 1.0);
+                    }
+
 
 layers:
     flip:
@@ -28,11 +40,11 @@ layers:
                 order: 50
                 color: [1, 0, .7]
                 # at z15, only extrude buildings at least 20 m tall; at z16 and higher, extrude everything
-                extrude: |
-                    function () { 
-                        feature.height = feature.AFTER_D_01
-                        return (($zoom >= 15 && feature.height > 5) || $zoom >= 16) }
+                extrude: function () { 
+                        return true; 
+                        feature.height = 100.0; //feature.AFTER_D_01 / 100;
                         }
+                style: elevator
             # interactive: true
     earth:
         data: { source: osm, layer: earth }
@@ -112,6 +124,6 @@ layers:
             polygons:
                 # make sure buildings are on top of all the separated road layers
                 order: 50
-                color: [.7, .7, .7]
+                color: [.7, .7, .3]
                 # at z15, only extrude buildings at least 20 m tall; at z16 and higher, extrude everything
                 # extrude: function () { return (($zoom >= 15 && feature.height > 20) || $zoom >= 16) }
