@@ -39,9 +39,13 @@ function drawThreeGeo(json, radius, shape, options) {
             }             
             drawLine(y_values, z_values, x_values, options);
             
-        } else if (json_geom[geom_num].type == 'Polygon') {                        
+        } else if (json_geom[geom_num].type == 'Polygon') {   
+            console.log('geometry type: polygon');
+
             for (var segment_num = 0; segment_num < json_geom[geom_num].coordinates.length; segment_num++) {
                 coordinate_array = createCoordinateArray(json_geom[geom_num].coordinates[segment_num]);           
+                
+                console.log('coordinate_array: ', coordinate_array);
                 
                 for (var point_num = 0; point_num < coordinate_array.length; point_num++) {
                     convertCoordinates(coordinate_array[point_num], radius); 
@@ -93,12 +97,16 @@ function createGeometryArray(json) {
         throw new Error('The geoJSON is not valid.');
     }    
     //alert(geometry_array.length);
+    console.log('geometry_array: ', geometry_array);
+    
     return geometry_array;
 }
 
 function getConversionFunctionName(shape) {
     var conversionFunctionName;
     
+    console.log('shape: ', shape);
+
     if (shape == 'sphere') {
         conversionFunctionName = convertToSphereCoords;
     } else if (shape == 'plane') {

@@ -16,12 +16,12 @@
 
 		<script src="scripts/three.min.js"></script>
 		<script src="assets/js/vendor/ThreeGeoJSON/threeGeoJSON.js"></script>
-		<script src="assets/js/vendor/jquery/dist/jquery.min.js"><\/script>
+		<script src="assets/js/vendor/jquery/dist/jquery.min.js"></script>
 
 		<script>
 
 			var camera, scene, renderer;
-			var mesh;
+			var plane;
 			var council;
 			var coords;
 
@@ -37,7 +37,7 @@
 
 				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 1000 );
 				camera.position.y = 20;
-				camera.position.z = -100;
+				camera.position.z = 500;
 
 				//
 
@@ -52,13 +52,13 @@
 				scene.add( light );
 
 				//
-
-				var geometry = new THREE.BoxGeometry( 200, 200, 200 );
+				var geometry = new THREE.PlaneGeometry(200,200,0);
+				// var geometry = new THREE.BoxGeometry( 200, 200, 200 );
 				var material = new THREE.MeshLambertMaterial( {color: 0xffff00} );
-				mesh = new THREE.Mesh( geometry, material );
-				mesh.rotation.x = .1;
-				mesh.rotation.y = 1;
-				scene.add( mesh );
+				plane = new THREE.Mesh( geometry, material );
+				plane.rotation.x = .1;
+				plane.rotation.y = 1;
+				scene.add( plane );
 
 				//
 
@@ -79,26 +79,26 @@
 
 				requestAnimationFrame( animate );
 
-				// mesh.rotation.x += 0.005;
-				// mesh.rotation.y += 0.01;
+				// plane.rotation.x += 0.005;
+				// plane.rotation.y += 0.01;
 
 				renderer.render( scene, camera );
 
 			}
 
 			function draw() {
-			  drawThreeGeo(council, 1, 'plane', {
+			  drawThreeGeo(council, 10, 'plane', {
 			      color: 'green'
 			  });			
 			}
 
-			$.getJSON('data/council36.geojson', function(data) {
+			$.getJSON('data/nycc_joined-to_nyc_flips.geojson', function(data) {
 			  console.log(data);
 			  council = data;
 				init();
 				animate();			  
 			  draw();
-			})			
+			});
 
 		</script>
 
