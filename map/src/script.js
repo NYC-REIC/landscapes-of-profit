@@ -1,4 +1,3 @@
-var baselayer = new L.StamenTileLayer("toner-lite");
 var sql = new cartodb.SQL({ user: 'lifewinning', format: 'geojson' });
 
 all_the_things = []
@@ -15,6 +14,15 @@ c = sql.execute("SELECT * FROM nycc_joined_to_nyc_flips_2263").done(function(geo
     cc_map = L.geoJson(geojson)
     cc_map.addTo(cc)
 })
+
+var tangram = Tangram.leafletLayer({
+    scene: 'src/scene.yaml',
+    attribution: '<a href="https://mapzen.com/tangram" target="_blank">Tangram</a> | &copy; OSM contributors | <a href="https://mapzen.com/" target="_blank">Mapzen</a>'
+     });
+
+window.layer = tangram
+var scene = tangram.scene
+window.scene = scene
 
 if (hashurl[1]){
     divid = '_'+hashurl[1].toString()
@@ -43,28 +51,24 @@ if (hashurl[1]){
             zoom: 19
 
         })
-        baselayer.addTo(map)
         buildings = L.geoJson(geojson, {
             style : {
-                'fillColor': '#FA98D6',
-                'fillOpacity': 1,
+                'fillColor': '',
+                'fillOpacity': 0,
                 'stroke': 0
             },
-            onEachFeature: function(feature, layer){
-                layer.on({click: function(e){
-                    window.location.hash = feature.properties.bbl
-                 }})
-                prev_bldg = layer
-                all_the_things.push(feature.properties.bbl)
-            }
+            // onEachFeature: function(feature, layer){}
+                
         })
         buildings.addTo(ff)
         ff.addTo(map)
+        tangram.addTo(map);
+        map.setView(map.getBounds().getCenter())
         zoomChangeLayers(map)
-        getBuildingsByBB(map)
-        map.on('moveend', function(){
-            getBuildingsByBB(map)   
-        })
+        // getBuildingsByBB(map)
+        // map.on('moveend', function(){
+        //     getBuildingsByBB(map)   
+        // })
 
     })
 } else {
@@ -75,13 +79,13 @@ if (hashurl[1]){
     });
     cc.addTo(map)
     zoomChangeLayers(map)
-    map.on('moveend', function(){
-     getBuildingsByBB(map)   
-    })
+    // map.on('moveend', function(){
+    // getBuildingsByBB(map)   
+    // })
     
 }
 
-new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
+// new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
 
 //don't load everything at once if you don't have to
 function getBuildingsByBB(m){
@@ -97,8 +101,8 @@ function getBuildingsByBB(m){
                 
                 add_json = L.geoJson(geojson.features[i],{
                     style : {
-                        'fillColor': '#c14a95',
-                        'fillOpacity': 1,
+                        'fillColor': '',
+                        'fillOpacity': 0,
                         'stroke': 0
                     },
                     onEachFeature: function(feature, layer){
@@ -107,14 +111,14 @@ function getBuildingsByBB(m){
                             window.location.hash = feature.properties.bbl
                             if (prev_bldg){
                                 prev_bldg.setStyle({
-                                    'fillColor': '#c14a95',
-                                    'fillOpacity': 1,
+                                    'fillColor': '',
+                                    'fillOpacity': 0,
                                     'stroke': 0
                                 })
                             }
                             layer.setStyle({
-                                    'fillColor': '#FA98D6',
-                                    'fillOpacity': 1,
+                                    'fillColor': '',
+                                    'fillOpacity': 0,
                                     'stroke': 0
                             })
 
@@ -131,18 +135,69 @@ function getBuildingsByBB(m){
 
 function zoomChangeLayers(m) {
     m.on('viewreset', function(e){
-        if(m.getZoom() > 15){
+        if(m.getZoom() > 14){
             m.removeLayer(cc)
-            baselayer.addTo(m)
-            getBuildingsByBB(m)
+            tangram.addTo(map);
+            // map.setView(map.getBounds().getCenter())
+            // getBuildingsByBB(m)
             ff.addTo(m)
         } else {
             cc.addTo(m)
-            m.removeLayer(baselayer)
+            map.removeLayer(tangram);
             m.removeLayer(ff)
         }
     })
 }
+
+//popups for buildings
+
+
+function initFeatureSelection () {
+
+    var selection_info = document.createElement('div');
+    selection_info.setAttribute('class', 'bldg-info');
+    selection_info.style.display = 'block';
+    
+    // Show feature on click
+    scene.container.addEventListener('click', function (event) {
+        var pixel = { x: event.clientX, y: event.clientY };
+
+        scene.getFeatureAt(pixel).then(function(selection) {    
+            if (!selection) {
+                return;
+            }
+            var feature = selection.feature;
+            if (feature != null) {
+
+                if (feature.properties.bbl != null) {
+                    window.location.hash = feature.properties.bbl
+                    console.log(feature.properties);
+                    selection_info.innerHTML =  "<h3>"+feature.properties.bbl+"</h3>";
+                    scene.container.appendChild(selection_info);
+                }
+            }
+            else if (selection_info.parentNode != null) {
+                selection_info.parentNode.removeChild(selection_info);
+            }
+        });
+        
+        // Don't show labels while panning
+        if (scene.panning == true) {
+            if (selection_info.parentNode != null) {
+                selection_info.parentNode.removeChild(selection_info);
+            }
+        }
+    });
+    
+}
+
+window.addEventListener('load', function () {
+    // Scene initialized
+    layer.on('init', function() {
+        initFeatureSelection();
+    });
+});
+
 
 //navigation 
 var pull = $('#pull');
@@ -160,4 +215,4 @@ $(window).resize(function(){
     if(w > 320 && nav.is(':hidden')) {  
         nav.removeAttr('style');
     }  
-});  
+}); 
