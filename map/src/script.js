@@ -164,21 +164,21 @@ $(window).resize(function(){
 
 $(document).ready(function () {
   // Searching within a bounding box
-  var southWest = new L.latLng(40.49, -74.27),
-      northEast = new L.latLng(40.87, -73.68),
-      bounds = L.latLngBounds(southWest, northEast);
-
   var geocoder = L.Control.geocoder({
-    bbox: bounds,
     position: 'topright',
     layers: 'address',
-    geocoder: new L.Control.Geocoder.Google(null, bounds),
+    geocoder: new L.Control.Geocoder.Google(null, {
+      bounds: '40.49,-74.27|40.87,-73.68'
+    }),
     placeholder: 'Search within New York City',
   });
   var oldMarkGeocode = geocoder.markGeocode;
   geocoder.markGeocode = function (result) {
     oldMarkGeocode.call(this, result);
     // Congrats, you have access to houseNumber, street, and county in `result`
+    // var houseNumber = result.address_components[0].short_name,
+    //     street = result.address_components[1].short_name,
+    //     county = result.address_components[4].short_name;
   };
   geocoder.addTo(map);
 

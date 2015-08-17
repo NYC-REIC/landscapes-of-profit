@@ -747,9 +747,9 @@
 			service_url: 'https://maps.googleapis.com/maps/api/geocode/json'
 		},
 
-		initialize: function(key, bounds) {
+		initialize: function(key, options) {
 				this._key = key;
-				this._bounds = bounds;
+				this._options = options;
 		},
 
 		geocode: function(query, cb, context) {
@@ -760,10 +760,7 @@
 			{
 				params['key'] = this._key
 			}
-			if(this._bounds) {
-				params['bounds'] = this._bounds.getSouth() + ',' + this._bounds.getWest() + '|' +
-					this._bounds.getNorth() + ',' + this._bounds.getEast();
-			}
+			params = L.Util.extend(params, this._options);
 
 			L.Control.Geocoder.getJSON(this.options.service_url, params, function(data) {
 					var results = [],
@@ -779,9 +776,7 @@
 									name: loc.formatted_address,
 									bbox: latLngBounds,
 									center: latLng,
-									houseNumber: loc.address_components[0].short_name,
-									street: loc.address_components[1].short_name,
-									county: loc.address_components[4].short_name
+									address_components: loc.address_components
 							};
 						}
 					}
