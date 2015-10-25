@@ -43,7 +43,7 @@ app.map.init = function() {
     divid = '_'+app.vars.hashurl[1].toString()
     // console.log(divid)
     // viewdiv = document.getElementById(divid)
-    f = sql.execute("SELECT * FROM nyc_flips WHERE (bbl ="+app.vars.hashurl[1]+")").done(function(geojson){
+    f = app.vars.sql.execute("SELECT * FROM nyc_flips WHERE (bbl ="+app.vars.hashurl[1]+")").done(function(geojson){
       // I cant' believe I'm doing this 
       flipLL = []
       center = geojson.features[0].geometry.coordinates[0]
@@ -99,6 +99,9 @@ app.map.init = function() {
 
   new L.Control.Zoom({ position: 'bottomright' }).addTo(app.vars.map);
 
+
+
+
 }
 
 app.map.zoomChangeLayers = function(m) {
@@ -115,48 +118,7 @@ app.map.zoomChangeLayers = function(m) {
 
 //don't load everything at once if you don't have to
 app.map.getBuildingsByBB = function(m){
-  // m.on('moveend', function(){
     bounds = m.getBounds()
-    b = sql.execute("SELECT * FROM nyc_flips WHERE the_geom && ST_SetSRID(ST_MakeBox2D(ST_Point("+bounds._northEast.lng+","+bounds._northEast.lat+"), ST_Point("+bounds._southWest.lng+","+bounds._southWest.lat+")), 4326)").done(function(geojson){     
-    for (var i = geojson.features.length - 1; i >= 0; i--) {
-      if ($.inArray(geojson.features[i].properties.bbl,all_the_things) == -1){
-        //assigning a height and color property to buildings just to see if i can dynamically do that and then use OSMBuildings? 
-        // geojson.features[i].properties['height'] = (geojson.features[i].properties.after_d_01)/1000
-        // geojson.features[i].properties['color'] = "rgb(255,200,150)"
-        all_the_things.push(geojson.features[i].properties.bbl)
-        
-        add_json = L.geoJson(geojson.features[i],{
-          style : {
-            'fillColor': '#c14a95',
-            'fillOpacity': 1,
-            'stroke': 0
-          },
-          onEachFeature: function(feature, layer){
-            layer.on({click: function(e){
-              map.fitBounds(layer.getBounds());
-              window.location.hash = feature.properties.bbl
-              if (prev_bldg){
-                prev_bldg.setStyle({
-                  'fillColor': '#c14a95',
-                  'fillOpacity': 1,
-                  'stroke': 0
-                })
-              }
-              layer.setStyle({
-                  'fillColor': '#FA98D6',
-                  'fillOpacity': 1,
-                  'stroke': 0
-              })
-
-              prev_bldg = layer
-             }})
-          }
-          })
-        add_json.addTo(ff)
-      }
-    };
-    })
-   // })
 }
 
 
