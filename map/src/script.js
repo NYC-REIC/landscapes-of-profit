@@ -1,3 +1,9 @@
+var app = app || {};
+
+app.map = (function(d,w,$) {
+
+})(document,window,jQuery);
+
 var baselayer = new L.StamenTileLayer("toner-lite");
 var sql = new cartodb.SQL({ user: 'lifewinning', format: 'geojson' });
 
