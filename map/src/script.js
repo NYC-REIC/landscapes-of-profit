@@ -1,13 +1,34 @@
 var app = app || {};
 
-app.map = (function(d,w,$) {
+app.vars = {
+    baselayer : new L.StamenTileLayer("toner-lite"),
+    sql : new cartodb.SQL({ user: 'clhenrick' }),
+    all_the_things : [],
+    $map : $('#map'),
+    url : window.location.href,
+    hashurl : url.split('#'),
+        
+};
 
-})(document,window,jQuery);
 
-var baselayer = new L.StamenTileLayer("toner-lite");
-var sql = new cartodb.SQL({ user: 'lifewinning', format: 'geojson' });
 
-all_the_things = []
+app.map(function(d,w,$) {
+
+    var init = function() {
+        app.vars.map = new L.Map($map)
+    }
+
+    return {
+        init : init
+    }
+
+})(document, window, jQuery);
+
+
+app.init = function() {
+    app.map.init();
+    app.gui.init();
+}
 
 url = window.location.href
 hashurl = url.split('#')
