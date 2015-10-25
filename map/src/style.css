@@ -2,12 +2,34 @@ body {
   margin: 0;
   padding: 0; }
 
+#map-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vh;
+  height: 100vw; }
+
 #map {
   top: 0;
-  bottom: 0;
-  width: 100%;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   position: absolute;
-  z-index: 0; }
+  z-index: 0;
+  /*
+  max-width: 100vh;
+  max-height: 100vw;
+  -webkit-clip-path: circle(50% at 50% 50%);
+  clip-path: circle(50% at 50% 50%); 
+  */ }
+
+#circle_ui {
+  width: 50px;
+  height: 50px;
+  -webkit-border-radius: 25px;
+  -moz-border-radius: 25px;
+  border-radius: 25px;
+  background-color: blue; }
 
 #bldg_info {
   display: none;
