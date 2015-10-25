@@ -2,7 +2,7 @@ var app = app || {};
 
 app.vars = {
   baselayer : new L.StamenTileLayer("toner-lite"),
-  sql : new cartodb.SQL({ user: 'clhenrick' }),
+  sql : new cartodb.SQL({ user: 'chenrick' }),
   all_the_things : [],
   $map : $('#map'),
   url : window.location.href,
@@ -18,6 +18,7 @@ app.vars.init = function() {
 }
 
 app.map = {}
+
 app.map.init = function() {
 
   var params = {
@@ -31,7 +32,7 @@ app.map.init = function() {
     attributionControl: true
   }
 
-  app.vars.map = new L.Map(app.vars.$map, params)
+  app.vars.map = new L.Map('map', params)
 
   app.vars.sql.execute("SELECT * FROM nycc_joined_to_nyc_flips_2263").done(function(geojson) {
     cc_map = L.geoJson(geojson)
@@ -63,7 +64,6 @@ app.map.init = function() {
         zoomControl: false,
         center: geom_center,
         zoom: 19
-
       })
       baselayer.addTo(map)
       buildings = L.geoJson(geojson, {
@@ -90,34 +90,24 @@ app.map.init = function() {
 
     })
   } else {
-    var map = new L.Map("map", {
-    zoomControl: false,
-    center: new L.LatLng(40.7009,-73.9579),
-    zoom: 11
-    });
-    cc.addTo(map)
-    app.map.zoomChangeLayers(map)
-    map.on('moveend', function(){
-     app.map.getBuildingsByBB(map)   
+    app.map.zoomChangeLayers(app.vars.map)
+    app.vars.map.on('moveend', function(){
+       app.map.getBuildingsByBB(app.vars.map)   
     })
     
   }
 
-  new L.Control.Zoom({ position: 'bottomright' }).addTo(map);
+  new L.Control.Zoom({ position: 'bottomright' }).addTo(app.vars.map);
 
 }
 
 app.map.zoomChangeLayers = function(m) {
   m.on('viewreset', function(e){
     if(m.getZoom() > 15){
-      m.removeLayer(cc)
-      baselayer.addTo(m)
+      app.vars.baselayer.addTo(m)
       app.map.getBuildingsByBB(m)
-      ff.addTo(m)
     } else {
-      cc.addTo(m)
-      m.removeLayer(baselayer)
-      m.removeLayer(ff)
+      m.removeLayer(app.vars.baselayer)
     }
   })
 }
@@ -198,15 +188,9 @@ $(window).resize(function(){
 
 $(document).ready(function () {
   app.init();
-    // Searching within a bounding box
-    var southWest = L.latLng(40.49, -74.27),
-      northEast = L.latLng(40.87, -73.68),
-      bounds = L.latLngBounds(southWest, northEast);
+  // Searching within a bounding box
+  var southWest = L.latLng(40.49, -74.27),
+    northEast = L.latLng(40.87, -73.68),
+    bounds = L.latLngBounds(southWest, northEast);
 
-    L.control.geocoder({
-    bbox: bounds,
-    position: 'topright',
-    layers: 'address',
-    placeholder: 'Search within New York City'
-    }).addTo(map);
 });
