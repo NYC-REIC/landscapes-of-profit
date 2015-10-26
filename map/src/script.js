@@ -125,7 +125,7 @@ app.getCartoDB = function(m) {
         type : "cartodb",
         sublayers : [{
             sql : "SELECT * FROM " + app.vars.taxLots,
-            cartoCSS : app.vars.cartocss.taxLots,
+            cartocss : app.vars.cartocss.taxLots,
             interactivity: ""
         }]
     }
@@ -149,6 +149,9 @@ app.getCartoDB = function(m) {
             test.done(function(data){
                 console.log(data);
             })
+
+            console.log(app.vars.layerSource);
+
         });
 }
 
