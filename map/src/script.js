@@ -31,7 +31,7 @@ app.map.init = function() {
     center : [40.694631,-73.925028],
     minZoom : 9,
     maxZoom : 18,
-    zoom : 14, 
+    zoom : 15, 
     zoomControl : false,
     infoControl: false,
     attributionControl: true
@@ -146,14 +146,6 @@ app.getCartoDB = function(m) {
         .on('done',function(layer) {
             layer.setZIndex(10); // make sure the cartodb layer is on top
             app.vars.dataLayer = layer.getSubLayer(0);
-            // console.log(layer, app.vars.dataLayer);
-            var test = app.vars.sql.execute("SELECT * FROM {{taxLots}}", { taxLots: app.vars.taxLots });
-            test.done(function(data){
-                console.log(data);
-            })
-
-            // console.log(app.vars.layerSource);
-
         });
 }
 
@@ -162,6 +154,8 @@ app.circle = function() {
   var bounds = app.vars.map.getBounds(),
       center = app.vars.map.getCenter();
 
+  console.log(center);
+
   var topPoint = turf.point([center.lng, bounds._northEast.lat]),
       centerPoint = turf.point([center.lng, center.lat]);  
 
@@ -169,6 +163,7 @@ app.circle = function() {
     centerToTop : function (c,t) {
       this.center = c;
       this.distance = turf.distance(c,t,'kilometers') * 0.85;
+      console.log(this.distance * 1000);
       return this;
     },
 
@@ -176,6 +171,17 @@ app.circle = function() {
       if (this.distance && this.center) {
         this.buffer = turf.buffer(this.center, this.distance, 'kilometers');
         this.circle = L.circle([center.lat,center.lng],(this.distance * 1000)) ;
+      }
+      return this;
+    },
+
+    webMercatorCircle : function() {
+      if (this.distance && this.center) {
+        this.SQLquery = "SELECT * FROM nyc_flips_pluto_150712 WHERE ST_Within(" +
+          "the_geom_webmercator, ST_Buffer(ST_Transform(ST_GeomFromText(" +
+          "'Point(" + center.lng + ' ' + center.lat + ")',4326)," + "3857)," +
+          (this.distance * 1200) + "))";
+        app.vars.dataLayer.setSQL(this.SQLquery);
       }
       return this;
     },
@@ -190,12 +196,12 @@ app.circle = function() {
     }
   }
 
-  bufferMaker.centerToTop(centerPoint,topPoint).bufferCenter().testBuffer();
+  bufferMaker.centerToTop(centerPoint,topPoint).bufferCenter().webMercatorCircle().testBuffer();
 
 }
 
 app.eventListeners = function() {  
-  app.vars.map.on('move', function(){
+  app.vars.map.on('moveend', function(){
     console.log('map moved');
     var zoom = app.vars.map.getZoom();
     
