@@ -15,7 +15,8 @@ app.vars = {
   layerSource : null,
   cdbOptions : null,
   dataLayer : null,
-  cartocss : app.cartocss
+  cartocss : app.cartocss,
+  fgTest : null
 };
 
 app.vars.init = function() {
@@ -30,7 +31,7 @@ app.map.init = function() {
     center : [40.694631,-73.925028],
     minZoom : 9,
     maxZoom : 18,
-    zoom : 11, 
+    zoom : 14, 
     zoomControl : false,
     infoControl: false,
     attributionControl: true
@@ -38,69 +39,70 @@ app.map.init = function() {
 
   app.vars.map = new L.Map('map', params);
   app.vars.baselayer.addTo(app.vars.map);
+  app.vars.fgTest = L.featureGroup().addTo(app.vars.map);
   app.getCartoDB(app.vars.map);
-
-  function tmp() {
-      if (app.vars.hashurl[1]){
-        divid = '_'+app.vars.hashurl[1].toString()
-        // console.log(divid)
-        // viewdiv = document.getElementById(divid)
-        f = app.vars.sql.execute("SELECT * FROM nyc_flips WHERE (bbl ="+app.vars.hashurl[1]+")").done(function(geojson){
-          // I cant' believe I'm doing this 
-          flipLL = []
-          center = geojson.features[0].geometry.coordinates[0]
-          for (var i = 0; i < center.length; i++) {
-            for (var j = 0; j < center[i].length; j++) {
-               arr = []
-               newLat = center[i][j][1]
-               newLon = center[i][j][0]
-               arr.push(newLat, newLon)
-               flipLL.push(arr)
-            };
-          };
-          get_center = L.polygon(flipLL)
-          //super-sketch thing for dealing with json lon/lat vs leaflet lat/lon
-          
-          geom_center = get_center.getBounds().getCenter()
-           map = new L.Map("map",{
-            zoomControl: false,
-            center: geom_center,
-            zoom: 19
-          })
-          baselayer.addTo(map)
-          buildings = L.geoJson(geojson, {
-            style : {
-              'fillColor': '#FA98D6',
-              'fillOpacity': 1,
-              'stroke': 0
-            },
-            onEachFeature: function(feature, layer){
-              layer.on({click: function(e){
-                window.location.hash = feature.properties.bbl
-               }})
-              prev_bldg = layer
-              all_the_things.push(feature.properties.bbl)
-            }
-          })
-          buildings.addTo(ff)
-          ff.addTo(map)
-          app.map.zoomChangeLayers(map)
-          app.map.getBuildingsByBB(map)
-          map.on('moveend', function(){
-            app.map.getBuildingsByBB(map)   
-          })
-
-        })
-      } else {
-        app.map.zoomChangeLayers(app.vars.map)
-        app.vars.map.on('moveend', function(){
-           app.map.getBuildingsByBB(app.vars.map)   
-        });
-      }
-  }
 
   new L.Control.Zoom({ position: 'bottomright' }).addTo(app.vars.map);
 
+}
+
+app.bblHash = function() {
+  if (app.vars.hashurl[1]){
+    divid = '_'+app.vars.hashurl[1].toString()
+    // console.log(divid)
+    // viewdiv = document.getElementById(divid)
+    f = app.vars.sql.execute("SELECT * FROM nyc_flips WHERE (bbl ="+app.vars.hashurl[1]+")").done(function(geojson){
+      // I cant' believe I'm doing this 
+      flipLL = []
+      center = geojson.features[0].geometry.coordinates[0]
+      for (var i = 0; i < center.length; i++) {
+        for (var j = 0; j < center[i].length; j++) {
+           arr = []
+           newLat = center[i][j][1]
+           newLon = center[i][j][0]
+           arr.push(newLat, newLon)
+           flipLL.push(arr)
+        };
+      };
+      get_center = L.polygon(flipLL)
+      //super-sketch thing for dealing with json lon/lat vs leaflet lat/lon
+      
+      geom_center = get_center.getBounds().getCenter()
+       map = new L.Map("map",{
+        zoomControl: false,
+        center: geom_center,
+        zoom: 19
+      })
+      baselayer.addTo(map)
+      buildings = L.geoJson(geojson, {
+        style : {
+          'fillColor': '#FA98D6',
+          'fillOpacity': 1,
+          'stroke': 0
+        },
+        onEachFeature: function(feature, layer){
+          layer.on({click: function(e){
+            window.location.hash = feature.properties.bbl
+           }})
+          prev_bldg = layer
+          all_the_things.push(feature.properties.bbl)
+        }
+      })
+      buildings.addTo(ff)
+      ff.addTo(map)
+      app.map.zoomChangeLayers(map)
+      app.map.getBuildingsByBB(map)
+      map.on('moveend', function(){
+        app.map.getBuildingsByBB(map)   
+      })
+
+    })
+  } else {
+    app.map.zoomChangeLayers(app.vars.map)
+    app.vars.map.on('moveend', function(){
+       app.map.getBuildingsByBB(app.vars.map)   
+    });
+  }
 }
 
 app.map.zoomChangeLayers = function(m) {
@@ -144,23 +146,71 @@ app.getCartoDB = function(m) {
         .on('done',function(layer) {
             layer.setZIndex(10); // make sure the cartodb layer is on top
             app.vars.dataLayer = layer.getSubLayer(0);
-            console.log(layer, app.vars.dataLayer);
+            // console.log(layer, app.vars.dataLayer);
             var test = app.vars.sql.execute("SELECT * FROM {{taxLots}}", { taxLots: app.vars.taxLots });
             test.done(function(data){
                 console.log(data);
             })
 
-            console.log(app.vars.layerSource);
+            // console.log(app.vars.layerSource);
 
         });
 }
 
 
+app.circle = function() {
+  var bounds = app.vars.map.getBounds(),
+      center = app.vars.map.getCenter();
+
+  var topPoint = turf.point([center.lng, bounds._northEast.lat]),
+      centerPoint = turf.point([center.lng, center.lat]);  
+
+  var bufferMaker = {
+    centerToTop : function (c,t) {
+      this.center = c;
+      this.distance = turf.distance(c,t,'kilometers') * 0.85;
+      return this;
+    },
+
+    bufferCenter : function () {
+      if (this.distance && this.center) {
+        this.buffer = turf.buffer(this.center, this.distance, 'kilometers');
+        this.circle = L.circle([center.lat,center.lng],(this.distance * 1000)) ;
+      }
+      return this;
+    },
+
+    testBuffer : function () {
+      if (this.buffer) {
+        app.vars.fgTest.clearLayers();
+        var g = L.geoJson(this.buffer);
+        app.vars.fgTest.addLayer(this.circle);
+        // app.vars.fgTest.addLayer(g);
+      }
+    }
+  }
+
+  bufferMaker.centerToTop(centerPoint,topPoint).bufferCenter().testBuffer();
+
+}
+
+app.eventListeners = function() {  
+  app.vars.map.on('move', function(){
+    console.log('map moved');
+    var zoom = app.vars.map.getZoom();
+    
+    if (zoom > 13 ) {
+      app.circle();
+    }
+    
+  });
+}
 
 
 app.init = function() {
   app.vars.init();
-  app.map.init();  
+  app.map.init();
+  app.eventListeners();
 }
 
 
