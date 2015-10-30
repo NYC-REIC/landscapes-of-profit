@@ -196,7 +196,11 @@ app.circle = function() {
     }
   }
 
-  bufferMaker.centerToTop(centerPoint,topPoint).bufferCenter().webMercatorCircle().testBuffer();
+  bufferMaker
+    .centerToTop(centerPoint,topPoint)
+    .bufferCenter()
+    .webMercatorCircle()
+    .testBuffer();
 
 }
 
@@ -205,7 +209,7 @@ app.eventListeners = function() {
     console.log('map moved');
     var zoom = app.vars.map.getZoom();
     
-    if (zoom > 13 ) {
+    if (zoom > 10 ) {
       app.circle();
     }
     
