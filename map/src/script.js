@@ -170,7 +170,7 @@ app.circle = function() {
     bufferCenter : function () {
       if (this.distance && this.center) {
         this.buffer = turf.buffer(this.center, this.distance, 'kilometers');
-        this.circle = L.circle([center.lat,center.lng],(this.distance * 1000)) ;
+        this.circle = L.circle([center.lat,center.lng],(this.distance * 1000 * 0.9)) ;
       }
       return this;
     },
