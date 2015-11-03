@@ -15,6 +15,9 @@ app.vars = {
   layerSource : null,
   cdbOptions : null,
   dataLayer : null,
+  queriedData: null,
+  sum: null,
+  tax: null,
   cartocss : app.cartocss,
   fgTest : null
 };
@@ -155,6 +158,7 @@ app.circle = function() {
       center = app.vars.map.getCenter();
 
   console.log(center);
+  console.log(app.vars.dataLayer.getSQL());
 
   var topPoint = turf.point([center.lng, bounds._northEast.lat]),
       centerPoint = turf.point([center.lng, center.lat]);  
@@ -182,6 +186,13 @@ app.circle = function() {
           "'Point(" + center.lng + ' ' + center.lat + ")',4326)," + "3857)," +
           (this.distance * 1200) + "))";
         app.vars.dataLayer.setSQL(this.SQLquery);
+        app.vars.sql.execute(this.SQLquery)
+          .done(function(data){
+            app.vars.queriedData = data;
+            app.vars.sum = _.sum(app.vars.queriedData.rows, function(obj) { return obj.after_d_01; });
+            app.vars.tax = app.vars.sum * 0.01;
+            console.log('sum: ', app.vars.sum, ' tax: ', app.vars.tax);
+          });
       }
       return this;
     },
