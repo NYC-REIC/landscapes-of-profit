@@ -255,6 +255,7 @@ app.eventListeners = function() {
   });
 
   app.vars.map.on('move', function(){
+    var zoom = app.vars.map.getZoom();
     if (zoom >10) {
       // here's where we might render the circle UI so that it doesn't appear jumpy
       // will require separating the L.circle method out of app.circle();
