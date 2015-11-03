@@ -157,8 +157,7 @@ app.circle = function() {
   var bounds = app.vars.map.getBounds(),
       center = app.vars.map.getCenter();
 
-  console.log(center);
-  console.log(app.vars.dataLayer.getSQL());
+  console.log('map center: ', center);
 
   var topPoint = turf.point([center.lng, bounds._northEast.lat]),
       centerPoint = turf.point([center.lng, center.lat]);  
@@ -184,17 +183,45 @@ app.circle = function() {
         this.SQLquery = "SELECT * FROM nyc_flips_pluto_150712 WHERE ST_Within(" +
           "the_geom_webmercator, ST_Buffer(ST_Transform(ST_GeomFromText(" +
           "'Point(" + center.lng + ' ' + center.lat + ")',4326)," + "3857)," +
-          (this.distance * 1200) + "))";
-        app.vars.dataLayer.setSQL(this.SQLquery);
+          (this.distance * 1200) + "))";        
+        // app.vars.dataLayer.setSQL(this.SQLquery); // temporarily disable the setSQL while instead changing the cartoCSS to see how that goes
         app.vars.sql.execute(this.SQLquery)
           .done(function(data){
-            app.vars.queriedData = data;
-            app.vars.sum = _.sum(app.vars.queriedData.rows, function(obj) { return obj.after_d_01; });
-            app.vars.tax = app.vars.sum * 0.01;
-            console.log('sum: ', app.vars.sum, ' tax: ', app.vars.tax);
+              bufferMaker.crunchData(data);
+              this.data = data;
+              return this;
           });
       }
       return this;
+    },
+
+    // helper function, uses lodash to do data analysis
+    crunchData : function(data) {
+        app.vars.queriedData = data;
+        app.vars.sum = _.sum(app.vars.queriedData.rows, function(obj) { return obj.after_d_01; });
+        app.vars.tax = app.vars.sum * 0.01;
+        app.vars.cartodb_ids = _.pluck(app.vars.queriedData.rows, 'cartodb_id'); // get all the cartodb ids to update the carto_css
+        console.log('sum: ', app.vars.sum, ' tax: ', app.vars.tax, ' cartodb_ids: ', app.vars.cartodb_ids);
+
+        bufferMaker.updateCartoCSS()
+    },
+
+    // helper function to create the CartoCSS update after the circle moves
+    // this ends up being too much of a request for the API to return tiles for at zooms =< 14
+    // think the postgis select query is faster and might be a better option.
+    updateCartoCSS : function() {
+      var cartoCSS = "",
+            tmp = "";
+      app.vars.cartodb_ids.forEach(function(el, i, arr) {
+        if (i < arr.length -1) {
+          tmp += '[cartodb_id=' + el + '],';
+        } else {
+          tmp += '[cartodb_id=' + el + ']';
+        }
+      });
+      // create the cartoCSS, using test colors of blue and red right now...
+      cartoCSS += '#' + app.vars.taxLots + "{" + "polygon-fill: blue;" + tmp + "{" + "polygon-fill: red;" + "}}"
+      app.vars.dataLayer.setCartoCSS(cartoCSS);
     },
 
     testBuffer : function () {
@@ -219,12 +246,20 @@ app.eventListeners = function() {
   app.vars.map.on('moveend', function(){
     console.log('map moved');
     var zoom = app.vars.map.getZoom();
+    console.log('map zoom level: ', zoom);
     
     if (zoom > 10 ) {
       app.circle();
     }
     
   });
+
+  app.vars.map.on('move', function(){
+    if (zoom >10) {
+      // here's where we might render the circle UI so that it doesn't appear jumpy
+      // will require separating the L.circle method out of app.circle();
+    }
+  })
 }
 
 
