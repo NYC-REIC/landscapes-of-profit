@@ -166,7 +166,7 @@ app.circle = function() {
     centerToTop : function (c,t) {
       this.center = c;
       this.distance = turf.distance(c,t,'kilometers') * 0.85;
-      console.log(this.distance * 1000);
+      console.log('distance: ', this.distance * 1000);
       return this;
     },
 
@@ -184,13 +184,31 @@ app.circle = function() {
           "the_geom_webmercator, ST_Buffer(ST_Transform(ST_GeomFromText(" +
           "'Point(" + center.lng + ' ' + center.lat + ")',4326)," + "3857)," +
           (this.distance * 1200) + "))";        
+        
+        this.SQLquery = "SELECT a.after_d_01, a.before__01, a.cartodb_id, a.the_geom_webmercator, a.within " +
+          "FROM ( SELECT *, ST_DWithin( the_geom_webmercator, ST_Transform( ST_GeomFromText( 'Point(" +
+          center.lng + ' ' + center.lat + ")', 4326), " + "3857)," + (this.distance * 1200) + ") as within " +
+          "FROM " + app.vars.taxLots + ") as a" 
+        
+        console.log(this.SQLquery);
+        
+        // check to make sure the query returns data
+        // app.vars.sql.execute(this.SQLquery).done(function(data) { console.log(data); });
+
+        app.vars.cartocss = '#' + app.vars.taxLots + "{line-opacity: 0; polygon-fill: blue; [within=true] { polygon-fill: red; }}";
+
+        app.vars.dataLayer.set({
+          sql : this.SQLquery,
+          cartocss : app.vars.cartocss
+        });
+
         // app.vars.dataLayer.setSQL(this.SQLquery); // temporarily disable the setSQL while instead changing the cartoCSS to see how that goes
-        app.vars.sql.execute(this.SQLquery)
-          .done(function(data){
-              bufferMaker.crunchData(data);
-              this.data = data;
-              return this;
-          });
+        // app.vars.sql.execute(this.SQLquery)
+        //   .done(function(data){
+        //       bufferMaker.crunchData(data);
+        //       this.data = data;
+        //       return this;
+        //   });
       }
       return this;
     },
