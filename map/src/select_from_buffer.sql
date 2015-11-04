@@ -31,4 +31,3 @@ FROM (
   ) as within
   FROM nyc_flips_pluto_150712
 ) as a
-WHERE a.within = true
