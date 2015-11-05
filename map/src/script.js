@@ -154,14 +154,17 @@ app.getCartoDB = function(m) {
 
 
 app.circle = function() {
+  // find the map's bounding box and center point
   var bounds = app.vars.map.getBounds(),
       center = app.vars.map.getCenter();
 
   console.log('map center: ', center);
 
+  // make some points for turf.js to calculate distance with
   var topPoint = turf.point([center.lng, bounds._northEast.lat]),
       centerPoint = turf.point([center.lng, center.lat]);  
 
+  // this object contains functions for creating the circle, updating the cartocss & data aggregation
   var bufferMaker = {
     centerToTop : function (c,t) {
       this.center = c;
@@ -180,35 +183,36 @@ app.circle = function() {
 
     webMercatorCircle : function() {
       if (this.distance && this.center) {
-        this.SQLquery = "SELECT * FROM nyc_flips_pluto_150712 WHERE ST_Within(" +
+        // SQL query for data aggergation
+        this.SQLquerySUM = "SELECT after_d_01 FROM nyc_flips_pluto_150712 WHERE ST_Within(" +
           "the_geom_webmercator, ST_Buffer(ST_Transform(ST_GeomFromText(" +
           "'Point(" + center.lng + ' ' + center.lat + ")',4326)," + "3857)," +
           (this.distance * 1200) + "))";        
         
-        this.SQLquery = "SELECT a.after_d_01, a.before__01, a.cartodb_id, a.the_geom_webmercator, a.within " +
+        // SQL query for data layer cartocss update
+        this.SQLqueryDL = "SELECT a.after_d_01, a.before__01, a.cartodb_id, a.the_geom_webmercator, a.within " +
           "FROM ( SELECT *, ST_DWithin( the_geom_webmercator, ST_Transform( ST_GeomFromText( 'Point(" +
           center.lng + ' ' + center.lat + ")', 4326), " + "3857)," + (this.distance * 1200) + ") as within " +
           "FROM " + app.vars.taxLots + ") as a" 
         
-        console.log(this.SQLquery);
+        console.log(this.SQLqueryDL);
         
-        // check to make sure the query returns data
-        // app.vars.sql.execute(this.SQLquery).done(function(data) { console.log(data); });
-
+        // create the cartocss for the data layer update
         app.vars.cartocss = '#' + app.vars.taxLots + "{line-opacity: 0; polygon-fill: blue; [within=true] { polygon-fill: red; }}";
 
+        // update the data layer's cartocss
         app.vars.dataLayer.set({
-          sql : this.SQLquery,
+          sql : this.SQLqueryDL,
           cartocss : app.vars.cartocss
         });
 
-        // app.vars.dataLayer.setSQL(this.SQLquery); // temporarily disable the setSQL while instead changing the cartoCSS to see how that goes
-        // app.vars.sql.execute(this.SQLquery)
-        //   .done(function(data){
-        //       bufferMaker.crunchData(data);
-        //       this.data = data;
-        //       return this;
-        //   });
+        // get the data for aggregation
+        app.vars.sql.execute(this.SQLquerySUM)
+          .done(function(data){
+              bufferMaker.crunchData(data);
+              this.data = data;
+              return this;
+          });
       }
       return this;
     },
@@ -218,10 +222,8 @@ app.circle = function() {
         app.vars.queriedData = data;
         app.vars.sum = _.sum(app.vars.queriedData.rows, function(obj) { return obj.after_d_01; });
         app.vars.tax = app.vars.sum * 0.01;
-        app.vars.cartodb_ids = _.pluck(app.vars.queriedData.rows, 'cartodb_id'); // get all the cartodb ids to update the carto_css
-        console.log('sum: ', app.vars.sum, ' tax: ', app.vars.tax, ' cartodb_ids: ', app.vars.cartodb_ids);
-
-        bufferMaker.updateCartoCSS()
+        
+        console.log('sum: ', app.vars.sum, ' tax: ', app.vars.tax);
     },
 
     // helper function to create the CartoCSS update after the circle moves
