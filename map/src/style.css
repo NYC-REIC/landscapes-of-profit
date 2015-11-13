@@ -2,6 +2,32 @@ body {
   margin: 0;
   padding: 0; }
 
+#totals {
+  position: absolute;
+  z-index: 1000;
+  right: 2%;
+  top: 2%;
+  background: #fff;
+  border: 2px solid hsl(322, 49%, 52%);
+  width: 150px;
+  height: 150px;
+  padding: 10px;
+}
+
+#totals h3 {
+  text-transform: uppercase;
+  font-weight: bold;
+  margin: 0;
+}
+
+#totals p.profit {
+  color: red;
+}
+
+#totals p.tax {
+  color: black;
+}
+
 #map-wrapper {
   display: flex;
   justify-content: center;
@@ -12,8 +38,8 @@ body {
 #map {
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  bottom: 0;
+  right: 0;
   position: absolute;
   z-index: 0;
   /*

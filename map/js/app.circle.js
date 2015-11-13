@@ -35,7 +35,8 @@ var app = (function(parent, $, L, cartodb, turf) {
         webMercatorCircle : function() {
           if (this.distance && this.center) {
             // SQL query for data aggergation
-            this.SQLquerySUM = "SELECT after_d_01 FROM nyc_flips_pluto_150712 WHERE ST_Within(" +
+            this.SQLquerySUM = "SELECT after_d_01 AS sale, (after_d_01 - before__01) AS profit " +
+              "FROM nyc_flips_pluto_150712 WHERE ST_Within(" +
               "the_geom_webmercator, ST_Buffer(ST_Transform(ST_GeomFromText(" +
               "'Point(" + el.center.lng + ' ' + el.center.lat + ")',4326)," + "3857)," +
               (this.distance * 1200) + "))";        
@@ -72,10 +73,18 @@ var app = (function(parent, $, L, cartodb, turf) {
         // helper function, uses lodash to do data analysis
         crunchData : function(data) {
             el.queriedData = data;
-            el.sum = _.sum(el.queriedData.rows, function(obj) { return obj.after_d_01; });
-            el.tax = el.sum * 0.01;
+            console.log(data);
+            el.sum = _.sum(el.queriedData.rows, function(obj) { return obj.profit; });
+            el.tax = _.sum(el.queriedData.rows, function(obj) { return obj.sale; }) * 0.01;
+            // el.tax = el.sum * 0.01;
             
-            console.log('sum: ', el.sum, ' tax: ', el.tax);
+            console.log('sum: ', el.sum, ' tax: ', el.tax.toPrecision());
+
+            var profit = "$" + (el.sum.toFixed(2) + "").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+            var tax = "$" + (el.tax.toFixed(2) + "").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+
+            $('.profit').text(profit);
+            $('.tax').text(tax);
         },
 
         // helper function to create the CartoCSS update after the circle moves
