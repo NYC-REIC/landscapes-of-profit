@@ -39,8 +39,21 @@
     <script type="text/javascript" src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.js"></script>
     <script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.3.0"></script>
     <script type="text/javascript" src="src/turf.min.js"></script>
-    <!-- the things -->
-    <script src="src/carto.js"></script>
-    <script src="src/script.js"></script>
+    
+    <!-- the app -->
+    <script src="js/app.el.js"></script>
+    <script src="js/app.map.js"></script>
+    <script src="js/app.cartocss.js"></script>
+    <script src="js/app.circle.js"></script>
+    <script src="js/app.hash.js"></script>
+    <script src="js/app.events.js"></script>
+    <script src="js/app.init.js"></script>
+
+    <!-- this script starts the app after the DOM is loaded -->
+    <script type="text/javascript">
+      jQuery(document).ready(function($) {
+        app.init();
+      });
+    </script>
   </body>
 </html>
