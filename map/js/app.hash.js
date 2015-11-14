@@ -1,4 +1,6 @@
 var app = (function(parent,$){
+  // use the URL hash to store a BBL from a tax lot that is clicked on by the user
+  // this code was done by Ingrid Burrington (@LifeWinning)
 
   var el = parent.el;
 

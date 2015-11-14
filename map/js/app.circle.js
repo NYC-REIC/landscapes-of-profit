@@ -51,6 +51,7 @@ var app = (function(parent, $, L, cartodb, turf) {
             console.log(this.SQLqueryDL);
             
             // create the cartocss for the data layer update
+            // this should really live in app.cartocss...
             el.cartocss = '#' + el.taxLots + "{line-opacity: 0; polygon-fill: blue; [within=true] { polygon-fill: red; }}";
 
             // update the data layer's cartocss
@@ -70,16 +71,14 @@ var app = (function(parent, $, L, cartodb, turf) {
           return this;
         },
 
-        // helper function, uses lodash to do data analysis
+        // helper function, uses lodash to do sum rows returned from CDB query
         crunchData : function(data) {
             el.queriedData = data;
             console.log(data);
             el.sum = _.sum(el.queriedData.rows, function(obj) { return obj.profit; });
             el.tax = _.sum(el.queriedData.rows, function(obj) { return obj.sale; }) * 0.01;
-            // el.tax = el.sum * 0.01;
-            
-            console.log('sum: ', el.sum, ' tax: ', el.tax.toPrecision());
 
+            // credit: http://stackoverflow.com/questions/17563677/convert-javascript-number-to-currency-format-but-without-or-any-currency-sym
             var profit = "$" + (el.sum.toFixed(2) + "").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
             var tax = "$" + (el.tax.toFixed(2) + "").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
 
@@ -87,34 +86,16 @@ var app = (function(parent, $, L, cartodb, turf) {
             $('.tax').text(tax);
         },
 
-        // helper function to create the CartoCSS update after the circle moves
-        // this ends up being too much of a request for the API to return tiles for at zooms =< 14
-        // think the postgis select query is faster and might be a better option.
-        updateCartoCSS : function() {
-          var cartoCSS = "",
-                tmp = "";
-          el.cartodb_ids.forEach(function(el, i, arr) {
-            if (i < arr.length -1) {
-              tmp += '[cartodb_id=' + el + '],';
-            } else {
-              tmp += '[cartodb_id=' + el + ']';
-            }
-          });
-          // create the cartoCSS, using test colors of blue and red right now...
-          cartoCSS += '#' + el.taxLots + "{" + "polygon-fill: blue;" + tmp + "{" + "polygon-fill: red;" + "}}"
-          el.dataLayer.setCartoCSS(cartoCSS);
-        },
-
+        // clear the current L.circle then draw the new one
         testBuffer : function () {
           if (this.buffer) {
             el.fgTest.clearLayers();
-            var g = L.geoJson(this.buffer);
             el.fgTest.addLayer(this.circle);
-            // el.fgTest.addLayer(g);
           }
         }
       }, // end bufferMaker
 
+      // draws the circle
       makeBuffer : function() {
         app.circle.bufferMaker
           .centerToTop(el.centerPoint, el.topPoint)
@@ -122,6 +103,7 @@ var app = (function(parent, $, L, cartodb, turf) {
           .testBuffer();
       },
 
+      // fires the PostGIS query
       queryCDB : function() {
         app.circle.bufferMaker.webMercatorCircle();
       }

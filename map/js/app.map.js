@@ -1,4 +1,5 @@
 var app = (function(parent, $, L, cartodb){
+  // sets up the Leaflet Map and loads the data layer from CartoDB
 
   var el = parent.el;
 

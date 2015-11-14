@@ -1,5 +1,7 @@
 var app = (function(parent) {
   
+  // the app's event listeners
+
   var el = parent.el;
 
   parent.eventListeners = function() {
